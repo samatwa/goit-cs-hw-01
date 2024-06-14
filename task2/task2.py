@@ -14,7 +14,6 @@ class TokenType:
     DIV = "DIV"
     LPAREN = "LPAREN"
     RPAREN = "RPAREN"
-
     EOF = "EOF"  # Означає кінець вхідного рядка
 
 
@@ -129,16 +128,10 @@ class Parser:
             self.error()
 
     def term(self):
-        """Парсер для 'term' правил граматики. У нашому випадку - це цілі числа."""
-        token = self.current_token
-        self.eat(TokenType.INTEGER)
-        return Num(token)
+        """Парсер для 'term' правил граматики."""
+        node = self.factor()
 
-    def expr(self):
-        """Парсер для арифметичних виразів."""
-        node = self.term()
-
-        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV, TokenType.LPAREN, TokenType.RPAREN):
+        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV):
             token = self.current_token
             if token.type == TokenType.PLUS:
                 self.eat(TokenType.PLUS)
@@ -148,16 +141,32 @@ class Parser:
                 self.eat(TokenType.MUL)
             elif token.type == TokenType.DIV:
                 self.eat(TokenType.DIV)
-            elif token.type == TokenType.LPAREN:
-                self.eat(TokenType.LPAREN)
-            elif token.type == TokenType.RPAREN:
-                self.eat(TokenType.RPAREN)
+
+            node = BinOp(left=node, op=token, right=self.factor())
+
+        return node
+
+    def expr(self):
+        """Парсер для арифметичних виразів."""
+        node = self.term()
+
+        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV):
+            token = self.current_token
+            if token.type == TokenType.PLUS:
+                self.eat(TokenType.PLUS)
+            elif token.type == TokenType.MINUS:
+                self.eat(TokenType.MINUS)
+            elif token.type == TokenType.MUL:
+                self.eat(TokenType.MUL)
+            elif token.type == TokenType.DIV:
+                self.eat(TokenType.DIV)
 
             node = BinOp(left=node, op=token, right=self.term())
 
         return node
     
     def factor(self):
+        """ Парсер для оброки чисел та виразів у дужках. """
         token = self.current_token
         if token.type == TokenType.INTEGER:
             self.eat(TokenType.INTEGER)
@@ -230,4 +239,4 @@ def main():
 
 
 if __name__ == "__main__":
-    assert main()
+    main()
