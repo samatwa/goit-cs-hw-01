@@ -131,13 +131,9 @@ class Parser:
         """Парсер для 'term' правил граматики."""
         node = self.factor()
 
-        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV):
+        while self.current_token.type in (TokenType.MUL, TokenType.DIV):
             token = self.current_token
-            if token.type == TokenType.PLUS:
-                self.eat(TokenType.PLUS)
-            elif token.type == TokenType.MINUS:
-                self.eat(TokenType.MINUS)
-            elif token.type == TokenType.MUL:
+            if token.type == TokenType.MUL:
                 self.eat(TokenType.MUL)
             elif token.type == TokenType.DIV:
                 self.eat(TokenType.DIV)
@@ -150,16 +146,12 @@ class Parser:
         """Парсер для арифметичних виразів."""
         node = self.term()
 
-        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV):
+        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
             token = self.current_token
             if token.type == TokenType.PLUS:
                 self.eat(TokenType.PLUS)
             elif token.type == TokenType.MINUS:
                 self.eat(TokenType.MINUS)
-            elif token.type == TokenType.MUL:
-                self.eat(TokenType.MUL)
-            elif token.type == TokenType.DIV:
-                self.eat(TokenType.DIV)
 
             node = BinOp(left=node, op=token, right=self.term())
 
@@ -204,6 +196,8 @@ class Interpreter:
         elif node.op.type == TokenType.MUL:
             return self.visit(node.left) * self.visit(node.right)
         elif node.op.type == TokenType.DIV:
+            if self.visit(node.right) == 0:
+                raise ZeroDivisionError("Division by zero")
             return self.visit(node.left) / self.visit(node.right)
 
     def visit_Num(self, node):
