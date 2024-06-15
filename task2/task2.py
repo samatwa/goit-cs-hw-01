@@ -128,7 +128,7 @@ class Parser:
             self.error()
 
     def term(self):
-        """Парсер для 'term' правил граматики."""
+        """Парсер для множення та ділення."""
         node = self.factor()
 
         while self.current_token.type in (TokenType.MUL, TokenType.DIV):
